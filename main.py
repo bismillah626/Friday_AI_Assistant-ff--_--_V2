@@ -1,11 +1,5 @@
 import speech_recognition as sr
 import pyttsx3
-from agents.friday_agent import create_friday_agent
-from memory.memory_manager import MemoryManager
-from core.llm_engine import get_flash_llm, get_pro_llm 
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-
 # --- Wake Word and Other Constants ---
 WAKE_WORD = "friday"
 
@@ -13,8 +7,8 @@ WAKE_WORD = "friday"
 from agents.friday_agent import create_friday_agent
 from memory.memory_manager import MemoryManager
 from core.llm_engine import get_flash_llm, get_pro_llm 
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain_core.prompts import PromptTemplate 
+from langchain_community.chains import LLMChain
 
 # --- Wake Word and Other Constants ---
 WAKE_WORD = "friday"

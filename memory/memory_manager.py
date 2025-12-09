@@ -1,6 +1,6 @@
 import chromadb
-from langchain.vectorstores import Chroma
-from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain.schema.retriever import BaseRetriever
 from langchain.memory import ConversationBufferMemory
 
