@@ -5,7 +5,7 @@ import pyjokes
 import wikipedia
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from langchain.tools import Tool
+from langchain_core.tools import Tool
 from config import SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, SPOTIPY_REDIRECT_URI
 import subprocess
 # === Spotify Client Setup ===
