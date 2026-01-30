@@ -3,17 +3,17 @@ from config import GOOGLE_API_KEY, HUGGINGFACE_API_KEYS
 from langchain_huggingface import HuggingFaceEndpoint
 
 def get_pro_llm():
-    """Initialize and return the Gemini-1.5-pro-LLM."""
+    """Initialize and return the Gemini-2.5-pro LLM (most powerful)."""
     return ChatGoogleGenerativeAI(
-        model = "gemini-1.5-pro",
+        model = "gemini-2.5-pro",
         google_api_key = GOOGLE_API_KEY,
         temperature = 0.75,
         convert_system_message_to_human=True 
         )
 def get_flash_llm():
-    """Initialize and return the Gemini-1.5-flash-LLM."""
+    """Initialize and return the Gemini-2.5-flash LLM (fast)."""
     return ChatGoogleGenerativeAI(
-        model = "gemini-1.5-flash",
+        model = "gemini-2.5-flash",
         google_api_key = GOOGLE_API_KEY,
         temperature = 0.75,
         convert_system_message_to_human=True     
