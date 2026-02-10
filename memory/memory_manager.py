@@ -62,13 +62,4 @@ class MemoryManager:
         
         print(f"[Memory] Saved interaction to Vector DB.")
 
-    def save_interaction(self, user_input: str, ai_response: str):
-        """Saves a user-AI interaction to the vector store."""
-        interaction_text = f"User asked: {user_input}\nFriday responded: {ai_response}"
-        self.vector_store.add_texts([interaction_text])
-        
-        # Save the updated FAISS index to disk
-        os.makedirs(self.faiss_index_path, exist_ok=True)
-        self.vector_store.save_local(self.faiss_index_path)
-        
-        print(f"[Memory] Saved interaction to Vector DB.")
+   

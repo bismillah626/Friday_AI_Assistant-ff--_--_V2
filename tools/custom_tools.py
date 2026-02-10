@@ -1,8 +1,6 @@
 import webbrowser
 import requests
 import os
-import pyjokes
-import wikipedia
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from langchain_core.tools import Tool
@@ -74,8 +72,28 @@ def open_app(item):
        else:
            return f"Could not find the application: {item}"
 #A function for playing song on spotify
-def play_song_spotify(song_name):
+def play_song_spotify(song_name: str) -> str:
+    """Play a song on Spotify by searching for the song name."""
+    if not sp:
+        return "Spotify is not connected. Please check your credentials in the .env file."
+    
     try:
+        # Check if there's an active device
+        devices = sp.devices()
+        
+        if not devices or not devices.get('devices'):
+            return "No active Spotify device found. Please open Spotify on your phone, computer, or web player first, then try again."
+        
+        # Check if any device is active
+        active_devices = [d for d in devices['devices'] if d.get('is_active')]
+        
+        if not active_devices:
+            # If no device is active, activate the first available one
+            device_id = devices['devices'][0]['id']
+            print(f"[Spotify] Activating device: {devices['devices'][0]['name']}")
+        else:
+            device_id = active_devices[0]['id']
+        
         # Force Spotify to treat the search as a track search
         query = f'track:"{song_name}"'
         results = sp.search(q=query, limit=5, type='track')
@@ -89,10 +107,28 @@ def play_song_spotify(song_name):
                 key=lambda track: SequenceMatcher(None, song_name.lower(), track['name'].lower()).ratio()
             )
 
+            track_name = best_match['name']
+            artist_name = best_match['artists'][0]['name']
             uri = best_match['uri']
-            sp.start_playback(uris=[uri])   
+            
+            # Start playback on the device
+            sp.start_playback(device_id=device_id, uris=[uri])
+            return f"Now playing '{track_name}' by {artist_name} on Spotify."
+        else:
+            return f"Could not find the song '{song_name}' on Spotify. Try a different search term."
+            
     except Exception as e:
-        print(f"[Spotify Error] {e}")
+        error_msg = str(e)
+        
+        # Specific error handling
+        if "NO_ACTIVE_DEVICE" in error_msg or "Player command failed" in error_msg:
+            return "No active Spotify device found. Please open Spotify on your phone, computer, or web player and start playing something first."
+        elif "PREMIUM_REQUIRED" in error_msg:
+            return "Spotify Premium is required to use playback control. Please upgrade your account."
+        elif "Unauthorized" in error_msg:
+            return "Spotify authorization failed. Please check your credentials."
+        else:
+            return f"Could not play the song on Spotify. Error: {error_msg}"
 
 def pause_spotify(query: str = "") -> str:
     """Useful for pausing the current music on Spotify."""
@@ -113,10 +149,10 @@ def open_website(url: str) -> str:
 
 
 #------Wrapping langchain around these functions to make them tools-------#
-weather_tool =Tool(
-    name = "Weather",
-    func = get_weather, 
-    description = "Useful for when you need to get the current weather. The location is inferred automatically if not provided."
+weather_tool = Tool(
+    name="Weather",
+    func=get_weather, 
+    description="Use this tool to get current weather information for any location. Input should be the city name or location (e.g., 'Delhi', 'Mumbai', 'New York'). If no location is specified by the user, use 'auto'. This tool provides real-time temperature and wind speed data."
 )
 spotify_play_tool = Tool(
     name = "SpotifyPlayer",
