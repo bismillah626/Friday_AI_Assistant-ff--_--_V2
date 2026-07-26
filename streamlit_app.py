@@ -2,7 +2,7 @@
 
 import streamlit as st
 from ui.styles import inject_css
-from ui.state import init_state, append_message
+from ui.state import init_state, append_message, clear_history
 from ui.loader import load_llms, load_memory_manager, load_agents
 from ui.router import route_query
 from ui.context import build_agent_input, save_interaction
@@ -31,7 +31,6 @@ with st.sidebar:
     st.markdown('<div class="sidebar-subtitle">Your intelligent assistant</div>', unsafe_allow_html=True)
 
     if st.button("✨ New Chat", key="new_chat", use_container_width=True):
-        from ui.state import clear_history
         clear_history()
         st.rerun()
 
@@ -62,11 +61,12 @@ for msg in st.session_state.messages:
 
 # ── Empty-state hero (when no messages yet) ─────
 STARTER_PROMPTS = [
-    "What's the weather like?",
-    "Tell me a joke",
-    "Explain quantum computing",
-    "Play some music on Spotify",
-    "What can you do?",
+    "🌤️ What's the weather like?",
+    "😂 Tell me a joke",
+    "🔬 Explain quantum computing",
+    "🎵 Play some music",
+    "💡 What can you do?",
+    "🐍 Help me with Python",
 ]
 
 if not st.session_state.messages:
@@ -78,11 +78,17 @@ if not st.session_state.messages:
         "</div>",
         unsafe_allow_html=True,
     )
-    # clickable starter chips
-    cols = st.columns(len(STARTER_PROMPTS))
-    for i, prompt in enumerate(STARTER_PROMPTS):
-        with cols[i]:
+    # clickable starter chips — 3 per row
+    row1 = st.columns(3)
+    row2 = st.columns(3)
+    for i, prompt in enumerate(STARTER_PROMPTS[:3]):
+        with row1[i]:
             if st.button(prompt, key=f"starter_{i}", use_container_width=True):
+                st.session_state["_prefill"] = prompt
+                st.rerun()
+    for i, prompt in enumerate(STARTER_PROMPTS[3:]):
+        with row2[i]:
+            if st.button(prompt, key=f"starter_{i+3}", use_container_width=True):
                 st.session_state["_prefill"] = prompt
                 st.rerun()
 
@@ -93,29 +99,39 @@ prefill = st.session_state.pop("_prefill", None)
 user_input = prefill or st.chat_input("Ask Friday anything…")
 
 if user_input:
+    # strip emoji prefix from starter chips if present
+    clean_input = user_input.split(" ", 1)[-1] if user_input[0] not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" and " " in user_input else user_input
+
     # show user message immediately
-    append_message("user", user_input)
-    render_message("user", user_input)
+    append_message("user", clean_input)
+    render_message("user", clean_input)
 
     # show thinking indicator while agent works
     thinking = show_thinking_indicator()
 
-    # route to correct model
-    chosen = route_query(user_input, flash_llm)
-    active_agent = pro_agent if chosen == "powerful" else flash_agent
-    st.session_state.last_model = chosen
+    try:
+        # route to correct model
+        chosen = route_query(clean_input, flash_llm)
+        active_agent = pro_agent if chosen == "powerful" else flash_agent
+        st.session_state.last_model = chosen
 
-    # build context-enriched input and get response
-    agent_input = build_agent_input(user_input, memory_manager)
-    response = active_agent.invoke({"input": agent_input})
-    response_text = response["output"]
+        # build context-enriched input and get response
+        agent_input = build_agent_input(clean_input, memory_manager)
+        response = active_agent.invoke({"input": agent_input})
+        response_text = response["output"]
 
-    # clear thinking indicator
-    thinking.empty()
+        # clear thinking indicator
+        thinking.empty()
 
-    # stream the response
-    stream_response(response_text)
-    append_message("assistant", response_text)
+        # stream the response
+        stream_response(response_text)
+        append_message("assistant", response_text)
 
-    # persist to memory
-    save_interaction(user_input, response_text, memory_manager)
+        # persist to memory
+        save_interaction(clean_input, response_text, memory_manager)
+
+    except Exception as e:
+        thinking.empty()
+        error_msg = f"Sorry, something went wrong: {e}"
+        render_message("assistant", error_msg)
+        append_message("assistant", error_msg)
