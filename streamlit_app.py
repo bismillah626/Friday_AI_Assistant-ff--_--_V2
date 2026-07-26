@@ -30,6 +30,32 @@ with st.sidebar:
     st.markdown('<div class="sidebar-title">🤖 Friday AI</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-subtitle">Your intelligent assistant</div>', unsafe_allow_html=True)
 
+    if st.button("✨ New Chat", key="new_chat", use_container_width=True):
+        from ui.state import clear_history
+        clear_history()
+        st.rerun()
+
+    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+
+    # model badge
+    st.markdown('<div class="sidebar-label">Last model used</div>', unsafe_allow_html=True)
+    model = st.session_state.last_model
+    if model == "powerful":
+        st.markdown(
+            '<span class="model-badge badge-pro">🧠 Gemini Pro</span>',
+            unsafe_allow_html=True,
+        )
+    elif model == "standard":
+        st.markdown(
+            '<span class="model-badge badge-flash">⚡ Gemini Flash</span>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<span style="color:#8888a0;font-size:0.8rem;">No queries yet</span>',
+            unsafe_allow_html=True,
+        )
+
 # ── Render existing chat history ────────────────
 for msg in st.session_state.messages:
     render_message(msg["role"], msg["content"])
