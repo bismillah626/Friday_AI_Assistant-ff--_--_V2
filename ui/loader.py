@@ -12,3 +12,17 @@ def load_llms():
     flash = get_flash_llm()
     pro = get_pro_llm()
     return flash, pro
+
+
+@st.cache_resource(show_spinner="Initializing memory…")
+def load_memory_manager():
+    """Return a MemoryManager instance. Cached — created once."""
+    return MemoryManager()
+
+
+@st.cache_resource(show_spinner="Creating agents…")
+def load_agents(_flash_llm, _pro_llm, _memory_manager):
+    """Build flash + pro agents. Underscored args tell Streamlit not to hash them."""
+    flash_agent = create_friday_agent(_flash_llm, _memory_manager.conversational_memory)
+    pro_agent = create_friday_agent(_pro_llm, _memory_manager.conversational_memory)
+    return flash_agent, pro_agent
