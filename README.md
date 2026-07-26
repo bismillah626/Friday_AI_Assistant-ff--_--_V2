@@ -1,69 +1,94 @@
 # Friday AI Assistant
 
 ## Overview
- Friday AI– Intelligent Voice Assistant Built an advanced, modular LLM-driven voice assistant designed for
- natural, emotionally aware interaction and contextual reasoning. Utilized LangChain as the core framework
- to integrate multiple modules — enabling conversational chains, task orchestration, and dynamic API routing.
- Implemented multi-layered memory systems including short-term (ConversationBufferMemory) and long-term
- recall using ChromaDB/Pinecone vector databases, enhancing continuity across sessions.
- Integrated Hugging Face Transformers and Gemini API keys for natural language understanding, sentiment
- analysis, summarization, and emotion-aware text generation. Used SentenceTransformers for vector embed
-dings to represent and retrieve conversational history semantically. Applied LangChain Prompt Templates for
- adaptive personality-driven interactions (e.g., friendly, professional, or technical tones)
 
+Friday AI is an intelligent, modular LLM-driven assistant built for natural, emotionally aware interaction and contextual reasoning. It supports both a **voice-activated terminal mode** and a **modern Streamlit chat UI**.
 
+Built with LangChain as the core framework — enabling conversational chains, task orchestration, and dynamic API routing. Features multi-layered memory (short-term conversational buffer + long-term FAISS vector store) for continuity across sessions. Uses Gemini 2.5 Flash/Pro for language understanding and automatic model routing based on query complexity.
 
-## Tech_Stack
+## Tech Stack
 
 | Category | Technology |
-|-----------|-------------|
+|---|---|
 | **Core Language** | Python |
 | **AI Framework** | LangChain |
-| **LLM Provider** | Hugging Face (Transformers) |
-| **Vector Database** | FAISS / ChromaDB |
-| **Voice Recognition** | SpeechRecognition |
-| **Text-to-Speech (TTS)** | pyttsx3 |
-| **APIs & Integrations** | Spotify API, Open-Meteo Weather API, Wikipedia API |
+| **LLM Provider** | Google Gemini (2.5 Flash + Pro) |
+| **Vector Database** | FAISS |
+| **Embeddings** | HuggingFace (all-MiniLM-L6-v2) |
+| **Frontend** | Streamlit |
+| **Voice Recognition** | SpeechRecognition + gTTS |
+| **APIs & Integrations** | Spotify API, Open-Meteo Weather API |
 | **Environment Management** | python-dotenv |
-| **Memory Handling** | LangChain Memory + Vector DB |
 
+## Features
 
+- **Streamlit Chat UI** — Dark-themed, ChatGPT-style interface with streaming responses, thinking indicators, and starter prompts
+- **Smart Model Routing** — Automatically selects Gemini Flash (fast) or Pro (powerful) based on query complexity
+- **Voice Activation** — Terminal mode responds to the wake word **"Friday"** (optional)
+- **Conversational Memory** — Short-term buffer + long-term FAISS vector store for contextual follow-ups
+- **Tool-Based Architecture** — Modular tools (Spotify, Weather, App Opener, Website Opener) registered with LangChain
+- **Music Control** — Play/pause tracks via the **Spotify API**
+- **Weather Assistant** — Real-time weather data from the **Open-Meteo API**
+- **Extensible** — Add your own tools or connect more APIs without changing the core logic
 
- ## Features
+## Quick Start
 
- **Voice Activation** – Responds when the wake word **“Friday”** is detected.  
- **Conversational Memory** – Maintains context using vector embeddings for meaningful follow-ups.  
- **Tool-Based Architecture** – Uses modular tools (Spotify, Weather, Wikipedia, etc.) registered with LangChain.  
- **Music Control** – Play, pause, or resume tracks using the **Spotify API**.  
- **Weather Assistant** – Fetches real-time weather data using the **Open-Meteo API**.  
- **Knowledge Search** – Retrieves concise answers from **Wikipedia** using LangChain’s retriever tools.  
- **Joke Generator** – Tells random programming jokes for casual interactions.  
- **Extensible** – Add your own tools or connect more APIs without changing the core logic.  
+### 1. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
+### 2. Set up environment variables
+Create a `.env` file:
+```
+GEMINI_API_KEYS=your_gemini_api_key
+HUGGINGFACE_API_KEYS=your_hf_key
+SPOTIPY_CLIENT_ID=your_spotify_id
+SPOTIPY_CLIENT_SECRET=your_spotify_secret
+SPOTIPY_REDIRECT_URI=http://localhost:8888/callback
+```
 
+### 3. Run the Streamlit UI
+```bash
+streamlit run streamlit_app.py
+```
 
-##  Project Architecture
+### 4. Or run the terminal mode
+```bash
+python main.py
+```
 
-Friday_AI_Assistant/<br>
-│<br>
-├── core/<br>
-│ ├── agent_manager.py # LangChain agent logic and reasoning<br>
-│ ├── memory_manager.py # Vector DB + conversational memory<br>
-│ ├── voice_engine.py # SpeechRecognition + pyttsx3<br>
-│ └── tool_registry.py # Tool setup and registration<br>
-│<br>
-├── tools/<br>
-│ ├── spotify_tool.py<br>
-│ ├── weather_tool.py<br>
-│ ├── wiki_tool.py<br>
-│ └── joke_tool.py<br>
-│<br>
-├── embeddings/<br>
-│ ├── vector_store.faiss<br>
-│ └── documents/ # Stored user or knowledge base data<br>
-│<br>
-├── main.py # Entry point<br>
-├── requirements.txt<br>
-├── .env.example<br>
-└── README.md<br>
+## Project Structure
 
+```
+Friday_AI_Assistant/
+├── streamlit_app.py          # Streamlit frontend entry point
+├── main.py                   # Terminal/voice mode entry point
+├── config.py                 # Environment config loader
+├── requirements.txt
+├── .streamlit/
+│   └── config.toml           # Streamlit dark theme config
+│
+├── ui/                       # Streamlit frontend package
+│   ├── __init__.py
+│   ├── state.py              # Session state init, chat history helpers
+│   ├── styles.py             # Custom CSS / dark theme injection
+│   ├── loader.py             # Cached LLM, agent, memory loading
+│   ├── router.py             # Smart model routing (flash vs pro)
+│   ├── context.py            # Memory retrieval + agent input builder
+│   └── chat.py               # Message rendering + streaming
+│
+├── agents/
+│   └── friday_agent.py       # LangChain agent with tool-calling
+│
+├── core/
+│   └── llm_engine.py         # Gemini Flash/Pro LLM initialization
+│
+├── memory/
+│   └── memory_manager.py     # FAISS vector store + conversational memory
+│
+├── tools/
+│   └── custom_tools.py       # Weather, Spotify, App/Website openers
+│
+└── faiss_db/                 # Persistent vector store data
+```
