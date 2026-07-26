@@ -34,8 +34,37 @@ with st.sidebar:
 for msg in st.session_state.messages:
     render_message(msg["role"], msg["content"])
 
+# ── Empty-state hero (when no messages yet) ─────
+STARTER_PROMPTS = [
+    "What's the weather like?",
+    "Tell me a joke",
+    "Explain quantum computing",
+    "Play some music on Spotify",
+    "What can you do?",
+]
+
+if not st.session_state.messages:
+    st.markdown(
+        '<div class="empty-hero">'
+        '<span class="empty-hero-icon">🤖</span>'
+        '<div class="empty-hero-title">Hey Boss, I\'m Friday</div>'
+        '<div class="empty-hero-sub">Your AI assistant — ask me anything to get started</div>'
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    # clickable starter chips
+    cols = st.columns(len(STARTER_PROMPTS))
+    for i, prompt in enumerate(STARTER_PROMPTS):
+        with cols[i]:
+            if st.button(prompt, key=f"starter_{i}", use_container_width=True):
+                st.session_state["_prefill"] = prompt
+                st.rerun()
+
+# ── Check for prefill from starter chip ─────────
+prefill = st.session_state.pop("_prefill", None)
+
 # ── Chat input ──────────────────────────────────
-user_input = st.chat_input("Ask Friday anything…")
+user_input = prefill or st.chat_input("Ask Friday anything…")
 
 if user_input:
     # show user message immediately
