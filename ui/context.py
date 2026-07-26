@@ -15,5 +15,9 @@ def build_agent_input(user_input: str, memory_manager):
 
 
 def save_interaction(user_input: str, response_text: str, memory_manager):
-    """Persist the exchange to vector memory — same as main.py does."""
+    """Persist the exchange to vector memory and conversational memory."""
     memory_manager.save_interaction(user_input, response_text)
+    # also update the short-term conversational memory used by the agent
+    memory_manager.conversational_memory.save_context(
+        {"input": user_input}, {"output": response_text}
+    )
