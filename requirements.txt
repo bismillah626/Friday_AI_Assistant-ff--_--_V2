@@ -19,3 +19,6 @@ spotipy>=2.25.0
 
 # Environment
 python-dotenv>=1.2.0
+
+# Frontend
+streamlit>=1.35.0
