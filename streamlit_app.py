@@ -2,7 +2,11 @@
 
 import streamlit as st
 from ui.styles import inject_css
-from ui.state import init_state
+from ui.state import init_state, append_message
+from ui.loader import load_llms, load_memory_manager, load_agents
+from ui.router import route_query
+from ui.context import build_agent_input, save_interaction
+from ui.chat import render_message
 
 # ── Page config (must be first st call) ─────────
 st.set_page_config(
@@ -16,10 +20,43 @@ st.set_page_config(
 inject_css()
 init_state()
 
+# ── Load cached resources ───────────────────────
+flash_llm, pro_llm = load_llms()
+memory_manager = load_memory_manager()
+flash_agent, pro_agent = load_agents(flash_llm, pro_llm, memory_manager)
+
 # ── Sidebar ─────────────────────────────────────
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🤖 Friday AI</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-subtitle">Your intelligent assistant</div>', unsafe_allow_html=True)
 
-# ── Placeholder for chat loop ───────────────────
-st.markdown("### Chat coming soon…")
+# ── Render existing chat history ────────────────
+for msg in st.session_state.messages:
+    render_message(msg["role"], msg["content"])
+
+# ── Chat input ──────────────────────────────────
+user_input = st.chat_input("Ask Friday anything…")
+
+if user_input:
+    # show user message immediately
+    append_message("user", user_input)
+    render_message("user", user_input)
+
+    # route to correct model
+    chosen = route_query(user_input, flash_llm)
+    active_agent = pro_agent if chosen == "powerful" else flash_agent
+    st.session_state.last_model = chosen
+
+    # build context-enriched input
+    agent_input = build_agent_input(user_input, memory_manager)
+
+    # get response
+    response = active_agent.invoke({"input": agent_input})
+    response_text = response["output"]
+
+    # show assistant response
+    append_message("assistant", response_text)
+    render_message("assistant", response_text)
+
+    # persist to memory
+    save_interaction(user_input, response_text, memory_manager)
