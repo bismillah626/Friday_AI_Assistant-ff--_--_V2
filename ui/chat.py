@@ -25,14 +25,21 @@ def stream_response(response_text: str):
     return streamed
 
 
-def show_thinking():
-    """Display a pulsing 'thinking…' indicator inside an assistant bubble."""
-    thinking_html = (
-        '<div style="display:flex;align-items:center;gap:6px;">'
-        '<span class="thinking-dot"></span>'
-        '<span class="thinking-dot"></span>'
-        '<span class="thinking-dot"></span>'
-        '<span style="color:#8888a0;font-size:0.85rem;margin-left:4px;">'
-        "Friday is thinking…</span></div>"
-    )
-    return st.chat_message("assistant").empty(), thinking_html
+THINKING_HTML = (
+    '<div style="display:flex;align-items:center;gap:6px;padding:8px 0;">'
+    '<span class="thinking-dot"></span>'
+    '<span class="thinking-dot"></span>'
+    '<span class="thinking-dot"></span>'
+    '<span style="color:#8888a0;font-size:0.85rem;margin-left:4px;">'
+    "Friday is thinking…</span></div>"
+)
+
+
+def show_thinking_indicator():
+    """Show pulsing dots indicator. Returns a container to clear later."""
+    container = st.container()
+    with container:
+        with st.chat_message("assistant"):
+            placeholder = st.empty()
+            placeholder.markdown(THINKING_HTML, unsafe_allow_html=True)
+    return container

@@ -6,7 +6,7 @@ from ui.state import init_state, append_message
 from ui.loader import load_llms, load_memory_manager, load_agents
 from ui.router import route_query
 from ui.context import build_agent_input, save_interaction
-from ui.chat import render_message, stream_response, show_thinking
+from ui.chat import render_message, stream_response, show_thinking_indicator
 
 # ── Page config (must be first st call) ─────────
 st.set_page_config(
@@ -42,9 +42,8 @@ if user_input:
     append_message("user", user_input)
     render_message("user", user_input)
 
-    # show thinking indicator
-    thinking_container, thinking_html = show_thinking()
-    thinking_container.markdown(thinking_html, unsafe_allow_html=True)
+    # show thinking indicator while agent works
+    thinking = show_thinking_indicator()
 
     # route to correct model
     chosen = route_query(user_input, flash_llm)
@@ -57,7 +56,7 @@ if user_input:
     response_text = response["output"]
 
     # clear thinking indicator
-    thinking_container.empty()
+    thinking.empty()
 
     # stream the response
     stream_response(response_text)
