@@ -219,6 +219,71 @@ html, body, [data-testid="stAppViewContainer"],
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
 }
+
+/* ── Message entrance animation ─────────────────── */
+@keyframes slide-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+[data-testid="stChatMessage"] {
+    animation: slide-up 0.3s ease-out;
+}
+
+/* ── Assistant bubble glassmorphism ──────────────── */
+[data-testid="stChatMessage"]:not([data-testid-type="user"]) .stMarkdown {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Streaming cursor blink ─────────────────────── */
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* ── Empty state hero ───────────────────────────── */
+.empty-hero {
+    text-align: center;
+    padding: 4rem 1rem 2rem;
+}
+.empty-hero-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+.empty-hero-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+.empty-hero-sub {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* ── Sidebar divider ────────────────────────────── */
+.sidebar-divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 1rem 0;
+}
+
+/* ── Sidebar model label ────────────────────────── */
+.sidebar-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
 </style>
 """
 
